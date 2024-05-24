@@ -1,0 +1,62 @@
+if _G.cons then
+    for _, v in pairs(_G.cons) do
+        v:Disconnect()
+    end
+
+    _G.cons = nil
+end
+
+local rsrv = game:GetService("RunService")
+local heartbeat = rsrv.Heartbeat
+local renderstepped = rsrv.RenderStepped
+
+local lp = game.Players.LocalPlayer
+local mouse = lp:GetMouse()
+
+local chr = lp.Character
+local hum = chr.Humanoid
+local root = hum.RootPart
+
+local isinvisible = false
+
+local visible_parts = {}
+
+for _, v in pairs(chr:GetDescendants()) do
+    if v:IsA("BasePart") and v.Transparency == 0 then
+        visible_parts[#visible_parts + 1] = v
+    end
+end
+
+local function ghost_parts()
+    for _, v in pairs(visible_parts) do
+        v.Transparency = v.Transparency == 0 and 0.5 or 0
+    end
+end
+
+local kdown = mouse.KeyDown:Connect(function(key)
+    if key == "g" then
+        isinvisible = not isinvisible
+        ghost_parts()
+    end
+end)
+
+local loop = heartbeat:Connect(function()
+    if isinvisible then
+        local oldcf = root.CFrame
+        local oldcamoffset = hum.CameraOffset
+
+        local newcf = oldcf * CFrame.new(0, -15, 0)
+
+        hum.CameraOffset = newcf:ToObjectSpace(CFrame.new(oldcf.Position)).Position
+        root.CFrame = newcf
+
+        renderstepped:Wait()
+
+        hum.CameraOffset = oldcamoffset
+        root.CFrame = oldcf
+    end
+end)
+
+_G.cons = {kdown, loop}
+
+print("Invisible Script Launched Successfully!")
