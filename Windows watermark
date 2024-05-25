@@ -1,0 +1,79 @@
+local player = game.Players.LocalPlayer
+
+local function createUI()
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ActivateWindowsUI"
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+
+    -- Create Frame for Watermark
+    local frame = Instance.new("Frame")
+    frame.Position = UDim2.new(0.5, -100, 1, -50) -- Adjusted position to be lower
+    frame.Size = UDim2.new(0, 200, 0, 50) -- Increased size
+    frame.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
+    frame.BackgroundTransparency = 0.5
+    frame.AnchorPoint = Vector2.new(0.5, 1) -- Center align horizontally
+    frame.Parent = screenGui
+
+    -- Create Watermark Text
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = "Activate Windows\nGo to Settings to activate Windows"
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSans
+    textLabel.TextWrapped = true
+    textLabel.Parent = frame
+
+    -- Add rounded corners to frame
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = frame
+
+    -- Create Rejoin Button
+    local rejoinButton = Instance.new("TextButton")
+    rejoinButton.Position = UDim2.new(1, -110, 0, 10) -- Position at top-right corner
+    rejoinButton.Size = UDim2.new(0, 100, 0, 30)
+    rejoinButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+    rejoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    rejoinButton.Text = "Rejoin"
+    rejoinButton.TextScaled = true
+    rejoinButton.Font = Enum.Font.SourceSans
+    rejoinButton.AnchorPoint = Vector2.new(1, 0)
+    rejoinButton.Parent = screenGui
+
+    -- Add rounded corners to rejoin button
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 10)
+    buttonCorner.Parent = rejoinButton
+
+    -- Rejoin button functionality
+    rejoinButton.MouseButton1Click:Connect(function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, player)
+    end)
+end
+
+local function mainScript()
+    createUI()
+end
+
+local function onCharacterAdded(character)
+    local humanoid = character:WaitForChild("Humanoid")
+
+    humanoid.Died:Connect(function()
+        -- Refresh the script on death
+        mainScript()
+    end)
+end
+
+-- Listen for character being added
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- In case the character is already loaded
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+
+-- Run the main script initially
+mainScript()
